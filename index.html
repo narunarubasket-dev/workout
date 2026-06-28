@@ -152,6 +152,23 @@ td.r { text-align: right; font-variant-numeric: tabular-nums; }
   display: none;
   color: var(--ink);
 }
+/* 記録モードを開くCTAボタン */
+.record-cta {
+  width: 100%;
+  padding: 14px 18px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #fff;
+  background: var(--slate);
+  border: 1px solid var(--slate);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: opacity .15s;
+}
+.record-cta:hover { color: #fff; background: var(--slate); opacity: .9; }
+#recordMode { margin-bottom: 16px; }
+#logIn { font-size: 16px; line-height: 1.7; min-height: 240px; }
+#logResult code, #recordMode code { background: var(--bg); border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; font-size: 12px; }
 /* layout grids (responsive) */
 .hero-grid { display:grid; grid-template-columns:1fr 1.3fr; gap:32px; align-items:center; }
 .metric-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:16px; }
@@ -181,6 +198,28 @@ td.r { text-align: right; font-variant-numeric: tabular-nums; }
 </head>
 <body>
 <div class="wrap">
+
+<!-- ===== 記録モード（筋トレ中の入力。既定では非表示） ===== -->
+<div id="recordMode" class="card" hidden>
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px;">
+    <div class="section-title">記録</div>
+    <button id="closeRecordBtn">← 戻る</button>
+  </div>
+  <div class="section-sub" style="margin-bottom:12px;">種目とセットを書いて、最後に「記録する」。<b>書きかけは自動保存</b>されるので途中で画面が消えても大丈夫。<br>例: <code>ベンチ 60x8.7.6</code>（<b>x でも × でもOK</b>）／ 体重は <code>体重 73.2</code></div>
+  <textarea id="logIn" rows="14" placeholder="2026/6/28&#10;ベンチプレス 60x8.7.6&#10;ラットプル 50x10.10.10&#10;スクワット 60x10.10&#10;体重 73.2"></textarea>
+  <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;">
+    <button id="logParseBtn">計算する</button>
+    <button id="logSaveBtn" style="border-color:var(--slate);color:var(--slate);font-weight:500;">記録する</button>
+  </div>
+  <div id="logResult"></div>
+</div>
+
+<div id="dashboard">
+
+<!-- 記録モードを開くCTA -->
+<div class="fade" style="margin-bottom:16px;">
+  <button id="openRecordBtn" class="record-cta">✏️ 今日のトレを記録する</button>
+</div>
 
 <!-- ===== HEADER ===== -->
 <div class="fade" style="margin-bottom:32px;">
@@ -329,24 +368,19 @@ td.r { text-align: right; font-variant-numeric: tabular-nums; }
   </table>
 </div>
 
-<!-- ===== PASTE TOOL ===== -->
+<!-- ===== データ管理 / 書き出し ===== -->
 <div class="card fade">
-  <div class="section-title" style="margin-bottom:4px;">メモを貼って記録</div>
-  <div class="section-sub" style="margin-bottom:16px;">1行目に日付（例 2026/6/14）、以降は「種目名 セット記法」。体重は「体重 75.5」。<b>「記録する」</b>でこの端末に保存され、すぐグラフに反映されます。</div>
-  <textarea id="pasteIn" rows="8" placeholder="2026/6/14&#10;ベンチプレス 60×8.7.6&#10;ラットプル 50×10.10.10&#10;体重 75.5"></textarea>
-  <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;">
-    <button id="parseBtn">計算する</button>
-    <button id="saveBtn" style="display:none;border-color:var(--slate);color:var(--slate);font-weight:500;">記録する</button>
-    <button id="copyBtn" style="display:none;">コードをコピー</button>
-  </div>
-  <div id="pasteResult"></div>
+  <div class="section-title" style="margin-bottom:4px;">データ管理 / 書き出し</div>
+  <div class="section-sub" style="margin-bottom:16px;">この端末に記録した内容の確認・削除と、<code>data.js</code> への書き出し。記録は上の「✏️ 今日のトレを記録する」から。</div>
+  <div id="storeInfo" class="lab" style="text-transform:none;letter-spacing:0;"></div>
   <pre class="pre-code" id="pasteCode"></pre>
-  <div id="storeInfo" class="lab" style="margin-top:18px;text-transform:none;letter-spacing:0;"></div>
+  <button id="copyBtn" style="display:none;margin-top:10px;">コードをコピー</button>
 </div>
 
 <!-- footer -->
 <p class="lab" style="text-align:center;margin-top:40px;letter-spacing:.1em;">強さ · 量とバランス · 継続 · 体</p>
 
+</div><!-- /dashboard -->
 </div><!-- /wrap -->
 
 <script src="data.js"></script>
@@ -401,10 +435,14 @@ function classify(name) {
 /* ============================================================
    parseSets() — extended with e1rm, setCount
    ============================================================ */
+/* 乗算記号の正規化: 半角 x/X/*、全角 ＊、✕ などを全角「×」に統一
+   （スマホで打ちやすい x や * をそのまま受け付けるため） */
+function normMul(str) { return String(str).replace(/[xX*＊✕╳ⅹｘ]/g, '×'); }
+
 function parseSets(str) {
   const blocks = [];
   let weightOnly = false;
-  for (const tok of String(str).trim().split(/\s+/).filter(Boolean)) {
+  for (const tok of normMul(str).trim().split(/\s+/).filter(Boolean)) {
     const parts = tok.split('×'); // ×
     const w = parseFloat(parts[0]);
     if (isNaN(w)) continue;
@@ -1126,17 +1164,18 @@ function parseSingleBlock(date, bodyLines) {
   const unknown = [];
   let pending = null;
   for (const ln of bodyLines) {
-    if (/^体重/.test(ln.replace(/\s/g,''))) continue;
-    const m = ln.match(/^(\D+?)\s*([\d.××\s]+)$/);
+    const L = normMul(ln); // x/X/* を × に正規化してから解析
+    if (/^体重/.test(L.replace(/\s/g,''))) continue;
+    const m = L.match(/^(\D+?)\s*([\d.××\s]+)$/);
     if (m && /[××]|\d/.test(m[2]) && classify(m[1])) {
       items.push({ name: m[1].trim(), sets: m[2].trim() }); pending = null;
-    } else if (classify(ln) && !/[××]/.test(ln)) {
+    } else if (classify(L) && !/[××]/.test(L)) {
       if (pending) unknown.push(pending); // 前の種目名が消化されなかった
-      pending = ln.trim();
+      pending = L.trim();
     } else if (pending) {
-      items.push({ name: pending, sets: ln.trim() }); pending = null;
+      items.push({ name: pending, sets: L.trim() }); pending = null;
     } else {
-      unknown.push(ln.trim());
+      unknown.push(L.trim());
     }
   }
   if (pending) unknown.push(pending);
@@ -1162,8 +1201,9 @@ function parsePaste(text) {
   return sessions.length ? sessions : null;
 }
 
-function renderPreview(sessions) {
-  const out = document.getElementById('pasteResult');
+function renderPreview(sessions, outId = 'logResult') {
+  const out = document.getElementById(outId);
+  if (!out) return;
   const multi = sessions.length > 1;
   let html = '<div style="margin-top:14px;overflow-x:auto;">';
   let hasContent = false;
@@ -1192,20 +1232,12 @@ function renderPreview(sessions) {
   out.innerHTML = hasContent ? html : '<p style="font-size:13px;color:var(--mut);margin-top:12px;">解析できる種目が見つかりませんでした。</p>';
 }
 
-document.getElementById('parseBtn').addEventListener('click', () => {
-  const codeEl = document.getElementById('pasteCode');
-  const copyBtn = document.getElementById('copyBtn');
-  const saveBtn = document.getElementById('saveBtn');
-  codeEl.style.display = 'none'; copyBtn.style.display = 'none';
-  const sessions = parsePaste(document.getElementById('pasteIn').value);
-  if (!sessions) { document.getElementById('pasteResult').innerHTML = ''; saveBtn.style.display = 'none'; return; }
-  renderPreview(sessions);
-  saveBtn.style.display = sessions.some(p => p.date && (p.items.length || p.pastedBW !== null)) ? 'inline-block' : 'none';
-});
-
-document.getElementById('saveBtn').addEventListener('click', () => {
-  const sessions = parsePaste(document.getElementById('pasteIn').value);
-  if (!sessions) { alert('記録できる内容がありません'); return; }
+/* ============================================================
+   記録（保存）ロジック — 旧 saveBtn から抽出して共通化
+   ============================================================ */
+function recordSessions(text) {
+  const sessions = parsePaste(text);
+  if (!sessions) { alert('記録できる内容がありません'); return false; }
   // 自己ベスト更新（PR）検出：保存前のベストと比較
   const prs = [];
   for (const p of sessions) {
@@ -1234,10 +1266,73 @@ document.getElementById('saveBtn').addEventListener('click', () => {
       userStore.bodyweight.push({ date: p.date, kg: p.pastedBW });
     }
   }
-  if (!saved) { alert('日付のある記録が見つかりませんでした（各セッションの先頭に日付を入れてください）'); return; }
+  if (!saved && !sessions.some(p => p.date && p.pastedBW !== null)) {
+    alert('日付のある記録が見つかりませんでした（先頭に日付を入れてください）'); return false;
+  }
   saveStore(userStore);
   if (prs.length) sessionStorage.setItem('workout_prs', JSON.stringify(prs));
-  location.reload();
+  return true;
+}
+
+/* ============================================================
+   記録モード（筋トレ中の入力）
+   ============================================================ */
+const DRAFT_KEY = 'workout_draft_v1';
+const logIn = document.getElementById('logIn');
+const recordMode = document.getElementById('recordMode');
+const dashboard = document.getElementById('dashboard');
+
+function todayStr() {
+  const d = new Date();
+  return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`;
+}
+function loadDraft() { try { return localStorage.getItem(DRAFT_KEY) || ''; } catch (e) { return ''; } }
+function saveDraft(v) { try { localStorage.setItem(DRAFT_KEY, v); } catch (e) {} }
+function clearDraft() { try { localStorage.removeItem(DRAFT_KEY); } catch (e) {} }
+
+// ライブプレビュー（デバウンス）
+let logPreviewTimer = null;
+function refreshLogPreview() {
+  const sessions = parsePaste(logIn.value);
+  if (!sessions) { document.getElementById('logResult').innerHTML = ''; return; }
+  renderPreview(sessions, 'logResult');
+}
+
+function openRecordMode() {
+  // 下書きがあれば復元、空なら今日の日付を入れておく
+  const draft = loadDraft();
+  logIn.value = draft && draft.trim() ? draft : todayStr() + '\n';
+  saveDraft(logIn.value);
+  dashboard.hidden = true;
+  recordMode.hidden = false;
+  refreshLogPreview();
+  window.scrollTo(0, 0);
+  // カーソルを末尾へ
+  logIn.focus();
+  logIn.setSelectionRange(logIn.value.length, logIn.value.length);
+}
+function closeRecordMode() {
+  recordMode.hidden = true;
+  dashboard.hidden = false;
+}
+
+document.getElementById('openRecordBtn').addEventListener('click', openRecordMode);
+document.getElementById('closeRecordBtn').addEventListener('click', closeRecordMode);
+
+logIn.addEventListener('input', () => {
+  saveDraft(logIn.value);
+  clearTimeout(logPreviewTimer);
+  logPreviewTimer = setTimeout(refreshLogPreview, 400);
+});
+
+document.getElementById('logParseBtn').addEventListener('click', refreshLogPreview);
+
+document.getElementById('logSaveBtn').addEventListener('click', () => {
+  if (!logIn.value.trim()) { alert('記録する内容がありません'); return; }
+  if (recordSessions(logIn.value)) {
+    clearDraft(); // 保存できた時だけ下書きを消す
+    location.reload();
+  }
 });
 
 document.getElementById('copyBtn').addEventListener('click', () => {
