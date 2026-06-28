@@ -1,0 +1,1464 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>トレーニング記録</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #FCFBF8;
+  --card: #FFFFFF;
+  --ink: #3F3A31;
+  --mut: #9C9588;
+  --faint: #C5BEB0;
+  --line: #ECE8DF;
+  --slate: #5E7C8A;
+  --clay: #B5795B;
+  --sage: #7E8F6E;
+  --gold: #C2A35A;
+  --rose: #B08A8A;
+}
+body {
+  font-family: 'Zen Kaku Gothic New', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.65;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+.wrap {
+  max-width: 1020px;
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+}
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 28px 32px;
+  box-shadow: 0 1px 4px rgba(63,58,49,.04);
+}
+.lab {
+  font-size: 11.5px;
+  color: var(--mut);
+  letter-spacing: .05em;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+.num { font-variant-numeric: tabular-nums; }
+select {
+  font-family: 'Zen Kaku Gothic New', sans-serif;
+  font-size: 12.5px;
+  color: var(--ink);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  padding: 5px 12px;
+  cursor: pointer;
+  outline: none;
+}
+select:focus { border-color: var(--slate); }
+hr.thin { border: none; border-top: 1px solid var(--line); margin: 20px 0; }
+.ex-chips { display:flex; flex-wrap:wrap; gap:6px 8px; margin-bottom:16px; align-items:center; }
+.ex-chip { display:inline-flex; align-items:center; gap:5px; padding:4px 12px 4px 8px; border:1px solid var(--line); border-radius:20px; font-size:12px; cursor:pointer; user-select:none; transition:border-color .15s, opacity .15s; }
+.ex-chip input[type=checkbox] { display:none; }
+.ex-chip-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.ex-chip.unchecked { opacity:.3; }
+textarea {
+  width: 100%;
+  font-family: 'Zen Kaku Gothic New', sans-serif;
+  font-size: 13px;
+  line-height: 1.6;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--ink);
+  resize: vertical;
+}
+textarea:focus { outline: none; border-color: var(--slate); }
+button {
+  font-family: 'Zen Kaku Gothic New', sans-serif;
+  font-size: 13px;
+  padding: 7px 18px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--card);
+  color: var(--ink);
+  cursor: pointer;
+}
+button:hover { border-color: var(--slate); color: var(--slate); }
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); }
+th { font-size: 11px; color: var(--mut); font-weight: 500; letter-spacing: .04em; }
+td.r { text-align: right; font-variant-numeric: tabular-nums; }
+.section-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: .02em;
+}
+.section-sub {
+  font-size: 12px;
+  color: var(--mut);
+  margin-top: 2px;
+}
+.chartbox {
+  position: relative;
+  height: 280px;
+}
+.chartbox-sm {
+  position: relative;
+  height: 160px;
+}
+/* fade-in on load */
+.fade { opacity: 0; animation: fadeIn .5s forwards; }
+.fade:nth-child(1) { animation-delay: .05s; }
+.fade:nth-child(2) { animation-delay: .1s; }
+.fade:nth-child(3) { animation-delay: .15s; }
+.fade:nth-child(4) { animation-delay: .2s; }
+.fade:nth-child(5) { animation-delay: .25s; }
+.fade:nth-child(6) { animation-delay: .3s; }
+.fade:nth-child(7) { animation-delay: .35s; }
+.fade:nth-child(8) { animation-delay: .4s; }
+.fade:nth-child(9) { animation-delay: .45s; }
+@keyframes fadeIn { to { opacity: 1; } }
+/* Custom legend */
+.legend { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 14px; }
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--ink); }
+.legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+/* insight text */
+.insight {
+  font-size: 12.5px;
+  color: var(--mut);
+  margin-top: 12px;
+  line-height: 1.8;
+}
+.pre-code {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+  line-height: 1.6;
+  margin-top: 10px;
+  display: none;
+  color: var(--ink);
+}
+/* layout grids (responsive) */
+.hero-grid { display:grid; grid-template-columns:1fr 1.3fr; gap:32px; align-items:center; }
+.metric-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:16px; }
+/* ===== mobile (スマホ) ===== */
+@media (max-width: 640px) {
+  .wrap { padding: 22px 14px 60px; }
+  .card { padding: 20px 18px; }
+  h1 { font-size: 20px !important; }
+  /* header: title と統計を縦並びに */
+  .header-row { flex-direction: column; }
+  .header-stats { gap: 22px !important; align-self: stretch; justify-content: flex-start; }
+  #hSessions, #hVolume, #hExCount { font-size: 18px !important; }
+  /* hero: 数値とグラフを縦積み */
+  .hero-grid { grid-template-columns: 1fr; gap: 16px; }
+  #heroBig { font-size: 56px !important; }
+  /* 3指標カード: 横3列のまま詰める */
+  .metric-grid { gap: 9px; }
+  .metric-grid .card { padding: 13px 12px; }
+  #metricAvg, #metricBestPart, #metricWeight { font-size: 20px !important; }
+  .chartbox { height: 240px; }
+  .chartbox-sm { height: 150px; }
+  /* テーブルは横スクロール可 */
+  table { font-size: 12px; }
+  th, td { padding: 6px 7px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ===== HEADER ===== -->
+<div class="fade" style="margin-bottom:32px;">
+  <div class="header-row" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px;">
+    <div>
+      <h1 style="font-size:22px;font-weight:700;letter-spacing:.02em;">トレーニング記録</h1>
+      <p class="lab" id="headerPeriod" style="margin-top:4px;"></p>
+    </div>
+    <div class="header-stats" style="display:flex;gap:32px;align-items:flex-end;flex-wrap:wrap;">
+      <div style="text-align:right;">
+        <div class="lab">セッション</div>
+        <div class="num" id="hSessions" style="font-size:22px;font-weight:300;color:var(--ink);"></div>
+      </div>
+      <div style="text-align:right;">
+        <div class="lab">総ボリューム</div>
+        <div class="num" id="hVolume" style="font-size:22px;font-weight:300;color:var(--ink);"></div>
+      </div>
+      <div style="text-align:right;">
+        <div class="lab">種目数</div>
+        <div class="num" id="hExCount" style="font-size:22px;font-weight:300;color:var(--ink);"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PERIOD FILTER ===== -->
+<div class="fade" style="display:flex;justify-content:flex-end;align-items:center;gap:10px;margin-bottom:16px;">
+  <span class="lab">表示期間</span>
+  <select id="periodSel">
+    <option value="6">直近6ヶ月</option>
+    <option value="12" selected>直近1年</option>
+    <option value="0">全期間</option>
+  </select>
+</div>
+
+<!-- ===== HERO CARD ===== -->
+<div class="card fade" style="margin-bottom:16px;" id="heroCard">
+  <div class="hero-grid">
+    <div>
+      <div class="lab">ベンチプレス · 推定1RM</div>
+      <div style="display:flex;align-items:baseline;gap:6px;margin-top:4px;">
+        <span id="heroBig" class="num" style="font-size:78px;font-weight:300;line-height:1;color:var(--ink);"></span>
+        <span style="font-size:20px;font-weight:300;color:var(--mut);">kg</span>
+      </div>
+      <div id="heroGrowth" style="font-size:14px;color:var(--slate);margin-top:4px;font-weight:500;"></div>
+    </div>
+    <div>
+      <div class="lab" style="margin-bottom:8px;">推定1RM 推移</div>
+      <div class="chartbox-sm">
+        <canvas id="heroChart" role="img" aria-label="ベンチプレス推定1RM推移"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 3 METRIC CARDS ===== -->
+<div class="fade metric-grid">
+  <div class="card">
+    <div class="lab">月平均トレ</div>
+    <div class="num" id="metricAvg" style="font-size:32px;font-weight:300;margin-top:4px;"></div>
+    <div class="lab" style="margin-top:2px;">回 / 月</div>
+  </div>
+  <div class="card">
+    <div class="lab">よく鍛えた部位</div>
+    <div id="metricBestPart" style="font-size:32px;font-weight:300;margin-top:4px;"></div>
+    <div class="lab" style="margin-top:2px;">セット数トップ</div>
+  </div>
+  <div class="card">
+    <div class="lab">直近の体重</div>
+    <div class="num" id="metricWeight" style="font-size:32px;font-weight:300;margin-top:4px;"></div>
+    <div class="lab" style="margin-top:2px;" id="metricWeightDate"></div>
+  </div>
+</div>
+
+<!-- ===== ① 強さ ===== -->
+<div class="card fade" style="margin-bottom:16px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
+    <div>
+      <div class="section-title">① 強さ — 推定1RM の推移</div>
+      <div class="section-sub">Epley式: w×(1+rep/30)、対象は1〜12rep</div>
+    </div>
+    <select id="e1rmPartSel"></select>
+  </div>
+  <div id="exCheckboxes" class="ex-chips"></div>
+  <div class="chartbox">
+    <canvas id="chartE1rm" role="img" aria-label="種目別推定1RM推移"></canvas>
+  </div>
+  <div class="legend" id="legendE1rm"></div>
+  <div class="insight" id="insightE1rm"></div>
+
+  <hr class="thin">
+  <div style="margin-bottom:12px;">
+    <div class="section-title" style="font-size:13px;">同部位・種目別ボリューム推移</div>
+  </div>
+  <div class="chartbox">
+    <canvas id="chartE1rmVol" role="img" aria-label="種目別ボリューム推移"></canvas>
+  </div>
+  <div class="legend" id="legendE1rmVol"></div>
+</div>
+
+<!-- ===== ② 量とバランス ===== -->
+<div class="card fade" style="margin-bottom:16px;">
+  <div class="section-title">② 量とバランス</div>
+
+  <hr class="thin">
+  <div class="section-sub" style="margin-bottom:12px;">部位別ボリューム推移（月次合計）— 同じ部位の時間推移を見る用</div>
+  <div class="chartbox">
+    <canvas id="chartPartVol" role="img" aria-label="部位別ボリューム推移"></canvas>
+  </div>
+  <div class="legend" id="legendPartVol"></div>
+
+  <hr class="thin">
+  <div class="section-sub" style="margin-bottom:12px;">部位別セット数（月別・スタック）— 月ごと・kgでなくセット数で見る（部位間バランス）</div>
+  <div style="font-size:11px;color:var(--faint);margin-bottom:8px;">kgで部位を横比較しない</div>
+  <div class="chartbox">
+    <canvas id="chartPartSets" role="img" aria-label="部位別月別セット数"></canvas>
+  </div>
+  <div class="legend" id="legendPartSets"></div>
+</div>
+
+<!-- ===== ③ 継続 ===== -->
+<div class="card fade" style="margin-bottom:16px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:16px;">
+    <div>
+      <div class="section-title">③ 継続 — 月別セッション数</div>
+      <div class="section-sub" id="continueSub">空白は休んだ月</div>
+    </div>
+  </div>
+  <div class="chartbox">
+    <canvas id="chartContinue" role="img" aria-label="月別セッション数"></canvas>
+  </div>
+</div>
+
+<!-- ===== ④ 体 ===== -->
+<div class="card fade" id="bodyCard" style="margin-bottom:16px;">
+  <div class="section-title" style="margin-bottom:16px;">④ 体</div>
+  <div id="bodyContent"></div>
+</div>
+
+<!-- ===== 自己ベスト ===== -->
+<div class="card fade" style="margin-bottom:16px;">
+  <div class="section-title" style="margin-bottom:16px;">自己ベスト（推定1RM）</div>
+  <table id="recordTable">
+    <thead><tr><th>種目</th><th>部位</th><th class="r">推定1RM</th><th class="r">記録日</th></tr></thead>
+    <tbody id="recordBody"></tbody>
+  </table>
+</div>
+
+<!-- ===== PASTE TOOL ===== -->
+<div class="card fade">
+  <div class="section-title" style="margin-bottom:4px;">メモを貼って記録</div>
+  <div class="section-sub" style="margin-bottom:16px;">1行目に日付（例 2026/6/14）、以降は「種目名 セット記法」。体重は「体重 75.5」。<b>「記録する」</b>でこの端末に保存され、すぐグラフに反映されます。</div>
+  <textarea id="pasteIn" rows="8" placeholder="2026/6/14&#10;ベンチプレス 60×8.7.6&#10;ラットプル 50×10.10.10&#10;体重 75.5"></textarea>
+  <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;">
+    <button id="parseBtn">計算する</button>
+    <button id="saveBtn" style="display:none;border-color:var(--slate);color:var(--slate);font-weight:500;">記録する</button>
+    <button id="copyBtn" style="display:none;">コードをコピー</button>
+  </div>
+  <div id="pasteResult"></div>
+  <pre class="pre-code" id="pasteCode"></pre>
+  <div id="storeInfo" class="lab" style="margin-top:18px;text-transform:none;letter-spacing:0;"></div>
+</div>
+
+<!-- footer -->
+<p class="lab" style="text-align:center;margin-top:40px;letter-spacing:.1em;">強さ · 量とバランス · 継続 · 体</p>
+
+</div><!-- /wrap -->
+
+<script src="data.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js" integrity="sha512-ZwR1/gSZM3ai6vCdI+LVF1zSq/5HznD3ZSTk7kajkaj4D292NLuduDCO1c/NT8Id+jE58KYLKT7hXnbtryGmMg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+'use strict';
+/* ============================================================
+   classify() — exercise name → { canon, part }
+   (verbatim from original index.html)
+   ============================================================ */
+function classify(name) {
+  const n = name.replace(/\s/g, "");
+  // 腕
+  if (/トライセプス|トラエク/.test(n)) return { canon: "トライセプスエクステンション", part: "腕" };
+  if (/スカルクラッシャー|スカクラ/.test(n)) return { canon: "スカルクラッシャー", part: "腕" };
+  if (/カール/.test(n)) return { canon: /インクライン/.test(n) ? "インクラインダンベルカール" : (/ダンベル/.test(n) ? "ダンベルカール" : "アームカール"), part: "腕" };
+  // 肩
+  if (/サイドレイズ|サイドアップ/.test(n)) return { canon: /インクライン/.test(n) ? "インクラインサイドレイズ" : "サイドレイズ", part: "肩" };
+  if (/リアレイズ|バックレイズ/.test(n)) return { canon: /インクライン/.test(n) ? "インクラインリアレイズ" : "リアレイズ", part: "肩" };
+  if (/アーノルド/.test(n)) return { canon: "アーノルドプレス", part: "肩" };
+  if (/ミリタリー/.test(n)) return { canon: "ミリタリープレス", part: "肩" };
+  if (/オーバーヘッド/.test(n)) return { canon: "オーバーヘッドプレス", part: "肩" };
+  if (/ショルダー/.test(n)) return { canon: "ショルダープレス", part: "肩" };
+  if (/シーテッドプレス/.test(n)) return { canon: "シーテッドプレス", part: "肩" };
+  // 背中
+  if (/ラット/.test(n)) return { canon: "ラットプルダウン", part: "背中" };
+  if (/加重懸垂/.test(n)) return { canon: "加重懸垂", part: "背中" };
+  if (/プルオーバー/.test(n)) return { canon: "プルオーバー", part: "背中" };
+  if (/ナロー/.test(n)) return { canon: "ナローグリップ", part: "背中" };
+  if (/[tTｔ]バー/.test(n)) return { canon: "tバー", part: "背中" };
+  if (/ロー/.test(n)) return { canon: "ローイング", part: "背中" };
+  // 脚
+  if (/レッグプレス|レッグプラス/.test(n)) return { canon: "レッグプレス", part: "脚" };
+  if (/エクステンション/.test(n)) return { canon: "レッグエクステンション", part: "脚" };
+  if (/ハックスクワット/.test(n)) return { canon: "ハックスクワット", part: "脚" };
+  if (/ブラジリアン/.test(n)) return { canon: "ブラジリアンスクワット", part: "脚" };
+  if (/スクワット/.test(n)) return { canon: "スクワット", part: "脚" };
+  if (/カーフ/.test(n)) return { canon: "カーフレイズ", part: "脚" };
+  if (/ランジ/.test(n)) return { canon: "ランジ", part: "脚" };
+  // 胸
+  if (/フライ/.test(n)) return { canon: "フライ", part: "胸" };
+  if (/インクライン/.test(n)) return { canon: "インクラインベンチ", part: "胸" };
+  if (/デクライン|ディクライン/.test(n)) return { canon: "デクライン", part: "胸" };
+  if (/ディップス/.test(n)) return { canon: "ディップス", part: "胸" };
+  if (/ケーブル/.test(n)) return { canon: "ケーブルフライ", part: "胸" };
+  if (/ダンベルプレス/.test(n)) return { canon: "ダンベルプレス", part: "胸" };
+  if (/チェストプレス|ラテラル/.test(n)) return { canon: "チェストプレス", part: "胸" };
+  if (/スミス|ベンチ/.test(n)) return { canon: "ベンチプレス", part: "胸" };
+  return null;
+}
+
+/* ============================================================
+   parseSets() — extended with e1rm, setCount
+   ============================================================ */
+function parseSets(str) {
+  const blocks = [];
+  let weightOnly = false;
+  for (const tok of String(str).trim().split(/\s+/).filter(Boolean)) {
+    const parts = tok.split('×'); // ×
+    const w = parseFloat(parts[0]);
+    if (isNaN(w)) continue;
+    if (parts.length === 1) {
+      blocks.push({ w, reps: [] });
+      weightOnly = true;
+    } else if (parts.length === 2) {
+      const repStr = parts[1];
+      if (repStr === '') {
+        blocks.push({ w, reps: [1] }); // trailing × → 1 set
+      } else {
+        const reps = repStr.split('.').map(Number).filter(x => !isNaN(x) && x > 0);
+        blocks.push({ w, reps: reps.length ? reps : [] });
+      }
+    } else {
+      // old W×R×S
+      const r = parseInt(parts[1], 10);
+      const s = (parts[2] === '' || parts[2] === undefined) ? 1 : parseInt(parts[2], 10);
+      const count = (isNaN(s) || s < 1) ? 1 : s;
+      blocks.push({ w, reps: isNaN(r) ? [] : Array(count).fill(r) });
+    }
+  }
+  let volume = 0, maxW = 0, hasVol = false;
+  let e1rm = null;
+  let setCount = 0;
+  for (const b of blocks) {
+    const totalReps = b.reps.reduce((a, c) => a + c, 0);
+    if (totalReps > 0) {
+      volume += b.w * totalReps;
+      hasVol = true;
+    }
+    if (b.w > maxW) maxW = b.w;
+    // setCount
+    if (b.reps.length === 0) {
+      setCount += 1; // weight-only block counts as 1
+    } else {
+      setCount += b.reps.length;
+    }
+    // e1rm per set (reps 1..12)
+    for (const r of b.reps) {
+      if (r >= 1 && r <= 12 && b.w > 0) {
+        const e = b.w * (1 + r / 30);
+        if (e1rm === null || e > e1rm) e1rm = e;
+      }
+    }
+  }
+  return { blocks, volume, maxW, hasVol, weightOnly, e1rm, setCount };
+}
+
+/* monthRange: returns ["YYYY-MM", ...] inclusive */
+function monthRange(minYM, maxYM) {
+  const result = [];
+  let [y, m] = minYM.split('-').map(Number);
+  const [ey, em] = maxYM.split('-').map(Number);
+  while (y < ey || (y === ey && m <= em)) {
+    result.push(`${y}-${String(m).padStart(2,'0')}`);
+    m++;
+    if (m > 12) { m = 1; y++; }
+  }
+  return result;
+}
+
+/* ============================================================
+   Data aggregation
+   ============================================================ */
+const PART_ORDER = ["胸", "背中", "脚", "肩", "腕"];
+const PART_COLOR = { "胸": "#5E7C8A", "背中": "#B5795B", "脚": "#7E8F6E", "肩": "#C2A35A", "腕": "#B08A8A" };
+const EX_COLORS = ["#5E7C8A","#B5795B","#7E8F6E","#C2A35A","#B08A8A","#7C6A8A","#6A8A7C","#8A7C6A","#6A7C8A","#8A6A7C"];
+
+// ---- ユーザー追記（この端末の localStorage に保存して反映） ----
+const STORE_KEY = 'workout_entries_v2';
+function loadStore() {
+  try { const s = JSON.parse(localStorage.getItem(STORE_KEY)); return (s && s.workouts) ? s : { workouts: [], bodyweight: [] }; }
+  catch (e) { return { workouts: [], bodyweight: [] }; }
+}
+function saveStore(s) { try { localStorage.setItem(STORE_KEY, JSON.stringify(s)); } catch (e) { alert('この端末に保存できませんでした（プライベートモード等の可能性）'); } }
+const userStore = loadStore();
+
+const rawData = [...(window.WORKOUT_DATA || []), ...userStore.workouts].sort((a,b) => a.date.localeCompare(b.date));
+const ts = d => new Date(d + 'T00:00:00').getTime();
+
+// per-session aggregation
+// exE1rm[canon] = [{x, y, date}]  (e1rm series)
+// exVol[canon]  = [{x, y}]
+// partVolSeries[part] = [{x, y}]  (volume per session)
+// setsByMonth[YYYY-MM][part] = total setCount
+// sessionsByMonth[YYYY-MM] = count
+const exE1rm = {}, exVol = {}, partVolSeries = {};
+const exMeta = {}; // canon -> part
+const exBestE1rm = {}; // canon -> { val, date }
+let totalVolume = 0;
+let totalSetsByPart = {}; // part -> setCount (for "best part")
+const sessionsByMonth = {};
+
+for (const sess of rawData) {
+  const ym = sess.date.slice(0, 7);
+  sessionsByMonth[ym] = (sessionsByMonth[ym] || 0) + 1;
+  const x = ts(sess.date);
+  const partVol = {};
+
+  for (const it of sess.items) {
+    const c = classify(it.name);
+    if (!c) continue;
+    const r = parseSets(it.sets);
+    exMeta[c.canon] = c.part;
+
+    if (r.hasVol) {
+      partVol[c.part] = (partVol[c.part] || 0) + r.volume;
+      totalVolume += r.volume;
+      (exVol[c.canon] = exVol[c.canon] || []).push({ x, y: Math.round(r.volume) });
+    }
+
+    if (r.e1rm !== null) {
+      (exE1rm[c.canon] = exE1rm[c.canon] || []).push({ x, y: Math.round(r.e1rm * 10) / 10, date: sess.date });
+      if (!exBestE1rm[c.canon] || r.e1rm > exBestE1rm[c.canon].val) {
+        exBestE1rm[c.canon] = { val: r.e1rm, date: sess.date };
+      }
+    }
+
+    // sets by part
+    totalSetsByPart[c.part] = (totalSetsByPart[c.part] || 0) + r.setCount;
+  }
+
+  for (const p of Object.keys(partVol)) {
+    (partVolSeries[p] = partVolSeries[p] || []).push({ x, y: Math.round(partVol[p]) });
+  }
+}
+
+// setsByMonth[YYYY-MM][part] / partVolByMonth[YYYY-MM][part]
+const setsByMonth = {};
+const partVolByMonth = {};
+for (const sess of rawData) {
+  const ym = sess.date.slice(0, 7);
+  if (!setsByMonth[ym]) setsByMonth[ym] = {};
+  if (!partVolByMonth[ym]) partVolByMonth[ym] = {};
+  for (const it of sess.items) {
+    const c = classify(it.name);
+    if (!c) continue;
+    const r = parseSets(it.sets);
+    setsByMonth[ym][c.part] = (setsByMonth[ym][c.part] || 0) + r.setCount;
+    if (r.hasVol) partVolByMonth[ym][c.part] = (partVolByMonth[ym][c.part] || 0) + r.volume;
+  }
+}
+
+const parts = PART_ORDER.filter(p => exMeta && Object.values(exMeta).includes(p));
+const minDate = rawData[0] ? rawData[0].date : '2023-01-01';
+const maxDate = rawData[rawData.length - 1] ? rawData[rawData.length - 1].date : '2026-01-01';
+const minYM = minDate.slice(0, 7);
+const maxYM = maxDate.slice(0, 7);
+const allMonths = monthRange(minYM, maxYM);
+
+// Number of months in range
+const nMonths = allMonths.length;
+const nSessions = rawData.length;
+
+/* ============================================================
+   Header fill
+   ============================================================ */
+document.getElementById('headerPeriod').textContent =
+  `${minDate.replace(/-/g, '.')} — ${maxDate.replace(/-/g, '.')}`;
+document.getElementById('hSessions').textContent = nSessions + ' 回';
+document.getElementById('hVolume').textContent = Math.round(totalVolume).toLocaleString() + ' 総kg';
+document.getElementById('hExCount').textContent = Object.keys(exMeta).length + ' 種目';
+
+/* ============================================================
+   Hero card — bench press
+   ============================================================ */
+const benchSeries = exE1rm['ベンチプレス'] || [];
+let heroBest = null;
+if (benchSeries.length) {
+  heroBest = benchSeries.reduce((a, b) => b.y > a.y ? b : a);
+  document.getElementById('heroBig').textContent = Math.round(heroBest.y);
+  // growth: earliest bench e1rm vs best
+  const firstVal = benchSeries[0].y;
+  const growth = Math.round((heroBest.y / firstVal - 1) * 100);
+  const firstYear = benchSeries[0].date.slice(0, 4);
+  document.getElementById('heroGrowth').textContent =
+    `+${growth}%  ${firstYear}年比`;
+} else {
+  document.getElementById('heroCard').style.display = 'none';
+}
+
+/* ============================================================
+   3 metric cards
+   ============================================================ */
+// 月平均
+const avgPerMonth = (nMonths > 0) ? (nSessions / nMonths) : 0;
+document.getElementById('metricAvg').textContent = avgPerMonth.toFixed(1);
+
+// best part by sets
+let bestPartName = '—';
+let bestPartSets = 0;
+for (const p of PART_ORDER) {
+  if ((totalSetsByPart[p] || 0) > bestPartSets) {
+    bestPartSets = totalSetsByPart[p];
+    bestPartName = p;
+  }
+}
+const bpEl = document.getElementById('metricBestPart');
+bpEl.textContent = bestPartName;
+bpEl.style.color = PART_COLOR[bestPartName] || 'var(--ink)';
+
+// bodyweight
+const bwMap = {};
+[...(window.BODYWEIGHT || []), ...userStore.bodyweight].forEach(b => { bwMap[b.date] = b; });
+const bwArr = Object.values(bwMap).sort((a,b) => a.date.localeCompare(b.date));
+const wEl = document.getElementById('metricWeight');
+const wDateEl = document.getElementById('metricWeightDate');
+if (bwArr.length) {
+  const last = bwArr[bwArr.length - 1];
+  wEl.textContent = last.kg + ' kg';
+  wDateEl.textContent = last.date;
+} else {
+  wEl.textContent = '未記録';
+  wEl.style.color = 'var(--faint)';
+  wEl.style.fontSize = '22px';
+  wEl.style.whiteSpace = 'nowrap';
+  wDateEl.textContent = 'メモで「体重 72.5」と記録';
+}
+
+/* ============================================================
+   Chart.js global defaults (set before fonts.ready)
+   ============================================================ */
+Chart.defaults.font.family = "'Zen Kaku Gothic New', sans-serif";
+Chart.defaults.color = '#9C9588';
+
+const GRID_COLOR = '#ECE8DF';
+const TICK_COLOR = '#9C9588';
+
+// 表示期間フィルタ（月数、0=全期間）
+let periodMonths = 12;
+function periodCutoff() {
+  if (!periodMonths) return -Infinity;
+  const d = new Date();
+  d.setMonth(d.getMonth() - periodMonths);
+  return d.getTime();
+}
+function filterByPeriod(arr) {
+  const cut = periodCutoff();
+  return arr.filter(p => p.x >= cut);
+}
+function xScaleLinear() {
+  return {
+    type: 'linear',
+    grid: { color: GRID_COLOR },
+    ticks: {
+      color: TICK_COLOR,
+      maxRotation: 0,
+      autoSkipPadding: 20,
+      callback: v => {
+        const d = new Date(v);
+        return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}`;
+      }
+    }
+  };
+}
+
+function yScaleLinear(label) {
+  return {
+    beginAtZero: true,
+    grid: { color: GRID_COLOR },
+    ticks: { color: TICK_COLOR },
+    title: { display: !!label, text: label || '', color: TICK_COLOR, font: { size: 11 } }
+  };
+}
+
+function baseLineOpts(ytitle) {
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    spanGaps: true,
+    interaction: { mode: 'nearest', intersect: false },
+    scales: { x: xScaleLinear(), y: yScaleLinear(ytitle) },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          title: items => new Date(items[0].parsed.x).toISOString().slice(0, 10),
+          label: c => `${c.dataset.label}: ${c.parsed.y}`
+        }
+      }
+    }
+  };
+}
+
+/* 部位に属する種目名（e1rm と volume の和集合）。
+   全セット13rep以上などで e1rm が出ない種目もボリュームグラフに残すため。 */
+function exNamesForPart(part) {
+  const set = new Set();
+  for (const n of Object.keys(exE1rm)) if (exMeta[n] === part) set.add(n);
+  for (const n of Object.keys(exVol))  if (exMeta[n] === part) set.add(n);
+  return [...set].sort();
+}
+
+/* stable color map: part → { exerciseName → color } */
+function exColorMap(part) {
+  const names = exNamesForPart(part);
+  const map = {};
+  names.forEach((name, i) => { map[name] = EX_COLORS[i % EX_COLORS.length]; });
+  return map;
+}
+
+/* build exercise datasets, filtered to checkedNames if provided */
+function exDatasets(series, part, colorMap, checkedNames) {
+  const names = Object.keys(series).filter(n => exMeta[n] === part && (!checkedNames || checkedNames.has(n))).sort();
+  return names.map(name => ({
+    label: name,
+    data: filterByPeriod(series[name] || []),
+    borderColor: colorMap[name] || EX_COLORS[0],
+    backgroundColor: colorMap[name] || EX_COLORS[0],
+    borderWidth: 2,
+    tension: .25,
+    pointRadius: 3,
+    pointHoverRadius: 6,
+    fill: false
+  }));
+}
+
+/* render exercise checkboxes for a part */
+function buildExCheckboxes(part, colorMap) {
+  const container = document.getElementById('exCheckboxes');
+  const names = exNamesForPart(part);
+  container.innerHTML = names.map(name => {
+    const color = colorMap[name] || '#888';
+    return `<label class="ex-chip" style="border-color:${color};" data-name="${name}">` +
+      `<input type="checkbox" value="${name}" checked>` +
+      `<span class="ex-chip-dot" style="background:${color}"></span>${name}` +
+      `</label>`;
+  }).join('');
+  container.querySelectorAll('input[type=checkbox]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      cb.closest('.ex-chip').classList.toggle('unchecked', !cb.checked);
+      refreshE1rmCharts(part, colorMap);
+    });
+  });
+}
+
+function getCheckedNames() {
+  const s = new Set();
+  document.querySelectorAll('#exCheckboxes input[type=checkbox]:checked').forEach(cb => s.add(cb.value));
+  return s;
+}
+
+function buildLegend(containerId, datasets) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  el.innerHTML = datasets.map(ds =>
+    `<div class="legend-item"><span class="legend-dot" style="background:${ds.borderColor}"></span>${ds.label}</div>`
+  ).join('');
+}
+
+/* ============================================================
+   Chart rendering inside fonts.ready
+   ============================================================ */
+let chartE1rm, chartE1rmVol, chartHero, chartPartVol, chartBW, chartRel;
+let curPart = null, curColorMap = null;
+
+/* 月次の部位別ボリューム（0の月はnullで線をつなぐ＝大局トレンド用） */
+function partVolMonthlyDatasets() {
+  return PART_ORDER.filter(p => partVolSeries[p]).map(p => ({
+    label: p,
+    data: filterByPeriod(allMonths.map(ym => {
+      const v = (partVolByMonth[ym] && partVolByMonth[ym][p]) || 0;
+      return { x: ts(ym + '-01'), y: v > 0 ? Math.round(v) : null };
+    })),
+    borderColor: PART_COLOR[p],
+    backgroundColor: PART_COLOR[p],
+    borderWidth: 2,
+    tension: .25,
+    pointRadius: 3,
+    fill: false
+  }));
+}
+
+/* 期間セレクタ変更時：時系列グラフを再描画 */
+function applyPeriod() {
+  if (chartHero) {
+    chartHero.data.datasets[0].data = filterByPeriod(benchSeries.map(d => ({ x: ts(d.date), y: d.y })));
+    chartHero.update();
+  }
+  if (chartE1rm && curPart) refreshE1rmCharts(curPart, curColorMap);
+  if (chartPartVol) {
+    const ds = partVolMonthlyDatasets();
+    chartPartVol.data.datasets = ds;
+    chartPartVol.update();
+    buildLegend('legendPartVol', ds);
+  }
+  if (chartBW) { chartBW.data.datasets[0].data = filterByPeriod(bwSeriesAll); chartBW.update(); }
+  if (chartRel) { chartRel.data.datasets[0].data = filterByPeriod(relDataAll); chartRel.update(); }
+}
+
+let bwSeriesAll = [], relDataAll = [];
+
+function updateE1rmInsight(part) {
+  const names = Object.keys(exE1rm).filter(n => exMeta[n] === part).sort();
+  const lines = names.map(name => {
+    const pts = exE1rm[name];
+    if (!pts || pts.length === 0) return null;
+    const first = pts[0].y;
+    const last = pts[pts.length - 1].y;
+    const best = Math.round(exBestE1rm[name] ? exBestE1rm[name].val : last);
+    return `${name}  ${Math.round(first)}→${Math.round(last)} kg（ベスト ${best} kg）`;
+  }).filter(Boolean);
+  document.getElementById('insightE1rm').innerHTML = lines.join('<br>') || '';
+}
+
+function refreshE1rmCharts(part, colorMap) {
+  curPart = part; curColorMap = colorMap;
+  const checked = getCheckedNames();
+  const ds1 = exDatasets(exE1rm, part, colorMap, checked);
+  const ds2 = exDatasets(exVol, part, colorMap, checked);
+  chartE1rm.data.datasets = ds1;
+  chartE1rm.update();
+  chartE1rmVol.data.datasets = ds2;
+  chartE1rmVol.update();
+  buildLegend('legendE1rm', ds1);
+  buildLegend('legendE1rmVol', ds2);
+  updateE1rmInsight(part);
+}
+
+document.fonts.ready.then(() => {
+
+  /* --- Hero mini line chart --- */
+  if (benchSeries.length) {
+    chartHero = new Chart(document.getElementById('heroChart'), {
+      type: 'line',
+      data: {
+        datasets: [{
+          label: 'ベンチプレス 推定1RM',
+          data: filterByPeriod(benchSeries.map(d => ({ x: ts(d.date), y: d.y }))),
+          borderColor: '#5E7C8A',
+          backgroundColor: 'rgba(94,124,138,.08)',
+          borderWidth: 2,
+          tension: .3,
+          pointRadius: 2,
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        spanGaps: true,
+        plugins: { legend: { display: false }, tooltip: {
+          callbacks: {
+            title: items => new Date(items[0].parsed.x).toISOString().slice(0,10),
+            label: c => `推定1RM: ${c.parsed.y} kg`
+          }
+        }},
+        scales: {
+          x: {
+            type: 'linear',
+            grid: { color: 'transparent' },
+            ticks: {
+              color: TICK_COLOR,
+              maxRotation: 0,
+              autoSkipPadding: 30,
+              callback: v => {
+                const d = new Date(v);
+                return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}`;
+              }
+            }
+          },
+          y: { beginAtZero: false, grid: { color: GRID_COLOR }, ticks: { color: TICK_COLOR } }
+        }
+      }
+    });
+  }
+
+  /* --- ① 強さ: e1rm chart + vol chart --- */
+  const partSel = document.getElementById('e1rmPartSel');
+  const defaultPart = parts.includes('胸') ? '胸' : parts[0];
+  partSel.innerHTML = parts.map(p => `<option value="${p}"${p===defaultPart?' selected':''}>${p}</option>`).join('');
+
+  chartE1rm = new Chart(document.getElementById('chartE1rm'), {
+    type: 'line',
+    data: { datasets: [] },
+    options: baseLineOpts('推定1RM (kg)')
+  });
+  chartE1rmVol = new Chart(document.getElementById('chartE1rmVol'), {
+    type: 'line',
+    data: { datasets: [] },
+    options: baseLineOpts('ボリューム (kg)')
+  });
+
+  function refreshE1rm(part) {
+    const colorMap = exColorMap(part);
+    buildExCheckboxes(part, colorMap);
+    refreshE1rmCharts(part, colorMap);
+  }
+  refreshE1rm(defaultPart);
+
+  partSel.addEventListener('change', () => refreshE1rm(partSel.value));
+
+  /* --- ② 部位別ボリューム推移 (月次集計・line) --- */
+  const partVolDs = partVolMonthlyDatasets();
+  chartPartVol = new Chart(document.getElementById('chartPartVol'), {
+    type: 'line',
+    data: { datasets: partVolDs },
+    options: baseLineOpts('ボリューム (kg/月)')
+  });
+  buildLegend('legendPartVol', partVolDs);
+
+  /* --- ② 部位別セット数 (stacked bar by month) --- */
+  const setsDs = PART_ORDER.map(p => ({
+    label: p,
+    data: allMonths.map(ym => (setsByMonth[ym] && setsByMonth[ym][p]) || 0),
+    backgroundColor: PART_COLOR[p],
+    borderColor: PART_COLOR[p],
+    borderWidth: 0
+  }));
+  new Chart(document.getElementById('chartPartSets'), {
+    type: 'bar',
+    data: { labels: allMonths, datasets: setsDs },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { mode: 'index', callbacks: { title: items => items[0].label } }
+      },
+      scales: {
+        x: {
+          stacked: true,
+          grid: { color: GRID_COLOR },
+          ticks: {
+            color: TICK_COLOR,
+            maxRotation: 45,
+            autoSkip: true,
+            maxTicksLimit: 18
+          }
+        },
+        y: { stacked: true, beginAtZero: true, grid: { color: GRID_COLOR }, ticks: { color: TICK_COLOR } }
+      }
+    }
+  });
+  buildLegend('legendPartSets', setsDs);
+
+  /* --- ③ 継続: sessions per month bar --- */
+  const sessData = allMonths.map(ym => sessionsByMonth[ym] || 0);
+  const avgSess = nSessions / nMonths;
+  document.getElementById('continueSub').textContent = `月別トレ回数 · 平均${avgSess.toFixed(1)}回/月 · 空白は休んだ月`;
+  new Chart(document.getElementById('chartContinue'), {
+    type: 'bar',
+    data: {
+      labels: allMonths,
+      datasets: [{
+        label: 'セッション数',
+        data: sessData,
+        backgroundColor: 'rgba(94,124,138,.55)',
+        borderColor: '#5E7C8A',
+        borderWidth: 1,
+        borderRadius: 3
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { title: items => items[0].label } }
+      },
+      scales: {
+        x: {
+          grid: { color: GRID_COLOR },
+          ticks: { color: TICK_COLOR, maxRotation: 45, autoSkip: true, maxTicksLimit: 18 }
+        },
+        y: { beginAtZero: true, grid: { color: GRID_COLOR }, ticks: { color: TICK_COLOR, precision: 0 } }
+      }
+    }
+  });
+
+  /* --- ④ 体 --- */
+  const bodyContent = document.getElementById('bodyContent');
+  if (!bwArr.length) {
+    bodyContent.innerHTML =
+      '<p style="color:var(--faint);font-size:14px;">体重を記録すると、体重推移と相対筋力（ベンチ推定1RM ÷ 体重）が表示されます。</p>';
+  } else {
+    // bodyweight line chart
+    const bwCanvas = document.createElement('canvas');
+    bwCanvas.setAttribute('role', 'img');
+    bwCanvas.setAttribute('aria-label', '体重推移');
+    const bwBox = document.createElement('div');
+    bwBox.className = 'chartbox';
+    bwBox.appendChild(bwCanvas);
+
+    const relCanvas = document.createElement('canvas');
+    relCanvas.setAttribute('role', 'img');
+    relCanvas.setAttribute('aria-label', '相対筋力推移');
+    const relBox = document.createElement('div');
+    relBox.className = 'chartbox';
+    relBox.style.marginTop = '20px';
+    relBox.appendChild(relCanvas);
+
+    bodyContent.appendChild(document.createElement('hr').constructor !== Object
+      ? (() => {
+          const d = document.createElement('div');
+          d.className = 'section-sub';
+          d.style.marginBottom = '12px';
+          d.textContent = '体重推移';
+          return d;
+        })()
+      : document.createElement('div')
+    );
+    // simpler approach
+    bodyContent.innerHTML = '';
+    bodyContent.insertAdjacentHTML('beforeend', '<div class="section-sub" style="margin-bottom:12px;">体重推移</div>');
+    const bwBoxEl = document.createElement('div');
+    bwBoxEl.className = 'chartbox';
+    const bwC = document.createElement('canvas');
+    bwC.setAttribute('role','img');
+    bwC.setAttribute('aria-label','体重推移');
+    bwBoxEl.appendChild(bwC);
+    bodyContent.appendChild(bwBoxEl);
+
+    bwSeriesAll = bwArr.map(d => ({ x: ts(d.date), y: d.kg }));
+    chartBW = new Chart(bwC, {
+      type: 'line',
+      data: {
+        datasets: [{
+          label: '体重 (kg)',
+          data: filterByPeriod(bwSeriesAll),
+          borderColor: '#B5795B',
+          backgroundColor: 'rgba(181,121,91,.08)',
+          borderWidth: 2,
+          tension: .3,
+          pointRadius: 3,
+          fill: true
+        }]
+      },
+      options: baseLineOpts('kg')
+    });
+
+    // relative strength: bench e1rm ÷ nearest bodyweight within ±30days
+    bodyContent.insertAdjacentHTML('beforeend', '<div class="section-sub" style="margin:20px 0 12px;">相対筋力 — ベンチ推定1RM ÷ 体重</div>');
+    const relBoxEl = document.createElement('div');
+    relBoxEl.className = 'chartbox';
+    const relC = document.createElement('canvas');
+    relC.setAttribute('role','img');
+    relC.setAttribute('aria-label','相対筋力推移');
+    relBoxEl.appendChild(relC);
+    bodyContent.appendChild(relBoxEl);
+
+    relDataAll = benchSeries.map(pt => {
+      const tTarget = ts(pt.date);
+      let nearestBW = null, nearestDiff = Infinity;
+      for (const bw of bwArr) {
+        const diff = Math.abs(ts(bw.date) - tTarget);
+        if (diff < nearestDiff) { nearestDiff = diff; nearestBW = bw.kg; }
+      }
+      const maxDiff = 30 * 86400 * 1000;
+      if (nearestDiff <= maxDiff && nearestBW) {
+        return { x: tTarget, y: Math.round((pt.y / nearestBW) * 100) / 100 };
+      }
+      return null;
+    }).filter(Boolean);
+
+    chartRel = new Chart(relC, {
+      type: 'line',
+      data: {
+        datasets: [{
+          label: '相対筋力',
+          data: filterByPeriod(relDataAll),
+          borderColor: '#5E7C8A',
+          backgroundColor: 'rgba(94,124,138,.08)',
+          borderWidth: 2,
+          tension: .3,
+          pointRadius: 3,
+          fill: true
+        }]
+      },
+      options: {
+        ...baseLineOpts('1RM / 体重'),
+        scales: {
+          x: xScaleLinear(),
+          y: { beginAtZero: false, grid: { color: GRID_COLOR }, ticks: { color: TICK_COLOR } }
+        }
+      }
+    });
+  }
+
+  /* --- 期間セレクタ --- */
+  const periodSel = document.getElementById('periodSel');
+  periodSel.addEventListener('change', () => {
+    periodMonths = parseInt(periodSel.value, 10);
+    applyPeriod();
+  });
+
+}); // end fonts.ready
+
+/* ============================================================
+   自己ベスト一覧
+   ============================================================ */
+const records = Object.entries(exBestE1rm)
+  .map(([canon, { val, date }]) => ({ canon, part: exMeta[canon], val, date }))
+  .sort((a, b) => b.val - a.val);
+
+document.getElementById('recordBody').innerHTML = records.map((r, i) =>
+  `<tr>
+    <td>${i === 0 ? `<span style="display:inline-block;width:8px;height:8px;background:var(--slate);border-radius:50%;margin-right:6px;"></span>` : '<span style="display:inline-block;width:14px;"></span>'}${r.canon}</td>
+    <td style="color:${PART_COLOR[r.part] || 'var(--mut)'};">${r.part}</td>
+    <td class="r"><b>${Math.round(r.val)}</b> kg</td>
+    <td class="r" style="color:var(--mut);font-size:12px;">${r.date}</td>
+  </tr>`
+).join('');
+
+/* ============================================================
+   Paste tool
+   ============================================================ */
+function normDate(s) {
+  const m = s.match(/(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})/);
+  return m ? `${m[1]}-${String(m[2]).padStart(2,'0')}-${String(m[3]).padStart(2,'0')}` : null;
+}
+
+function parseSingleBlock(date, bodyLines) {
+  let pastedBW = null;
+  const bwMatch = bodyLines.find(l => /^体重[\s　]*([\d.]+)\s*(?:kg)?$/i.test(l.replace(/\s/g,'')));
+  if (bwMatch) { const m = bwMatch.match(/([\d.]+)/); if (m) pastedBW = parseFloat(m[1]); }
+  const items = [];
+  const unknown = [];
+  let pending = null;
+  for (const ln of bodyLines) {
+    if (/^体重/.test(ln.replace(/\s/g,''))) continue;
+    const m = ln.match(/^(\D+?)\s*([\d.××\s]+)$/);
+    if (m && /[××]|\d/.test(m[2]) && classify(m[1])) {
+      items.push({ name: m[1].trim(), sets: m[2].trim() }); pending = null;
+    } else if (classify(ln) && !/[××]/.test(ln)) {
+      if (pending) unknown.push(pending); // 前の種目名が消化されなかった
+      pending = ln.trim();
+    } else if (pending) {
+      items.push({ name: pending, sets: ln.trim() }); pending = null;
+    } else {
+      unknown.push(ln.trim());
+    }
+  }
+  if (pending) unknown.push(pending);
+  return { date, items, pastedBW, unknown };
+}
+
+function parsePaste(text) {
+  const lines = text.split('\n').map(s => s.trim());
+  const sessions = [];
+  let currentDate = null;
+  let currentLines = [];
+  for (const line of lines) {
+    if (!line) continue;
+    const d = normDate(line);
+    if (d) {
+      if (currentDate) sessions.push(parseSingleBlock(currentDate, currentLines));
+      currentDate = d; currentLines = [];
+    } else if (currentDate) {
+      currentLines.push(line);
+    }
+  }
+  if (currentDate) sessions.push(parseSingleBlock(currentDate, currentLines));
+  return sessions.length ? sessions : null;
+}
+
+function renderPreview(sessions) {
+  const out = document.getElementById('pasteResult');
+  const multi = sessions.length > 1;
+  let html = '<div style="margin-top:14px;overflow-x:auto;">';
+  let hasContent = false;
+  for (const p of sessions) {
+    const hasUnknown = p.unknown && p.unknown.length;
+    if (!p.items.length && p.pastedBW === null && !hasUnknown) continue;
+    hasContent = true;
+    if (multi) html += `<div style="font-size:12px;font-weight:500;color:var(--slate);margin:10px 0 5px;">${p.date || '日付不明'}</div>`;
+    if (p.items.length) {
+      let rows = '', totalV = 0;
+      for (const it of p.items) {
+        const c = classify(it.name); if (!c) continue;
+        const r = parseSets(it.sets);
+        totalV += r.volume;
+        const e1rmStr = r.e1rm !== null ? Math.round(r.e1rm) + ' kg' : '—';
+        rows += `<tr><td style="color:${PART_COLOR[c.part] || ''}">${c.part}</td><td>${c.canon}</td><td class="r">${r.hasVol ? Math.round(r.volume).toLocaleString() : '—'}</td><td class="r">${r.maxW || '—'}</td><td class="r">${e1rmStr}</td><td class="r">${r.setCount}</td></tr>`;
+      }
+      html += `<table><thead><tr><th>部位</th><th>種目</th><th class="r">ボリューム</th><th class="r">最大kg</th><th class="r">推定1RM</th><th class="r">セット数</th></tr></thead><tbody>${rows}</tbody></table>`;
+      html += `<p style="font-size:12px;color:var(--mut);margin-top:4px;">合計 <b>${Math.round(totalV).toLocaleString()} kg</b></p>`;
+    }
+    if (p.pastedBW !== null) html += `<p style="font-size:12px;color:var(--mut);">体重: <b>${p.pastedBW} kg</b></p>`;
+    if (hasUnknown) html += `<p style="font-size:12px;color:var(--clay);margin-top:6px;">⚠ 解析できなかった行（記録されません）:<br>${p.unknown.map(u => '「' + u.replace(/</g,'&lt;') + '」').join('<br>')}</p>`;
+    if (!p.date) html += '<p style="font-size:12px;color:var(--clay);">⚠ 日付がありません。</p>';
+  }
+  html += '</div>';
+  out.innerHTML = hasContent ? html : '<p style="font-size:13px;color:var(--mut);margin-top:12px;">解析できる種目が見つかりませんでした。</p>';
+}
+
+document.getElementById('parseBtn').addEventListener('click', () => {
+  const codeEl = document.getElementById('pasteCode');
+  const copyBtn = document.getElementById('copyBtn');
+  const saveBtn = document.getElementById('saveBtn');
+  codeEl.style.display = 'none'; copyBtn.style.display = 'none';
+  const sessions = parsePaste(document.getElementById('pasteIn').value);
+  if (!sessions) { document.getElementById('pasteResult').innerHTML = ''; saveBtn.style.display = 'none'; return; }
+  renderPreview(sessions);
+  saveBtn.style.display = sessions.some(p => p.date && (p.items.length || p.pastedBW !== null)) ? 'inline-block' : 'none';
+});
+
+document.getElementById('saveBtn').addEventListener('click', () => {
+  const sessions = parsePaste(document.getElementById('pasteIn').value);
+  if (!sessions) { alert('記録できる内容がありません'); return; }
+  // 自己ベスト更新（PR）検出：保存前のベストと比較
+  const prs = [];
+  for (const p of sessions) {
+    if (!p.date) continue;
+    for (const it of p.items) {
+      const c = classify(it.name); if (!c) continue;
+      const e = parseSets(it.sets).e1rm;
+      if (e === null) continue;
+      // 初回記録（過去ベストなし）は「更新」ではないので祝福しない
+      if (!exBestE1rm[c.canon]) continue;
+      const prev = exBestE1rm[c.canon].val;
+      // 表示は四捨五入kg。実際に表示が増えるときだけ祝福する
+      if (Math.round(e) > Math.round(prev)) prs.push({ name: c.canon, from: Math.round(prev), to: Math.round(e) });
+    }
+  }
+  let saved = 0;
+  for (const p of sessions) {
+    if (!p.date) continue;
+    if (p.items.length) {
+      userStore.workouts = userStore.workouts.filter(w => w.date !== p.date);
+      userStore.workouts.push({ date: p.date, items: p.items });
+      saved++;
+    }
+    if (p.pastedBW !== null) {
+      userStore.bodyweight = userStore.bodyweight.filter(b => b.date !== p.date);
+      userStore.bodyweight.push({ date: p.date, kg: p.pastedBW });
+    }
+  }
+  if (!saved) { alert('日付のある記録が見つかりませんでした（各セッションの先頭に日付を入れてください）'); return; }
+  saveStore(userStore);
+  if (prs.length) sessionStorage.setItem('workout_prs', JSON.stringify(prs));
+  location.reload();
+});
+
+document.getElementById('copyBtn').addEventListener('click', () => {
+  navigator.clipboard.writeText(document.getElementById('pasteCode').textContent).then(() => {
+    const b = document.getElementById('copyBtn');
+    const t = b.textContent;
+    b.textContent = 'コピーしました ✓';
+    setTimeout(() => b.textContent = t, 1500);
+  }).catch(() => { alert('コピーできませんでした。コードを手動で選択してください。'); });
+});
+
+function exportStore() {
+  let code = '';
+  if (userStore.workouts.length) {
+    code += '// data.js の WORKOUT_DATA に追加:\n' + userStore.workouts.map(w =>
+      `  { date: "${w.date}", items: [\n${w.items.map(it => `    { name: "${it.name}", sets: "${it.sets}" },`).join('\n')}\n  ]},`).join('\n') + '\n';
+  }
+  if (userStore.bodyweight.length) {
+    code += '\n// data.js の BODYWEIGHT に追加:\n' + userStore.bodyweight.map(b => `  { date: "${b.date}", kg: ${b.kg} },`).join('\n');
+  }
+  const codeEl = document.getElementById('pasteCode');
+  codeEl.textContent = code.trim();
+  codeEl.style.display = 'block';
+  document.getElementById('copyBtn').style.display = 'inline-block';
+}
+
+/* ============================================================
+   ⑤ 大局観と次回ヒント
+   ============================================================ */
+function pickByData(candidates) {
+  return candidates.reduce((best, c) =>
+    (exE1rm[c] || []).length > (exE1rm[best] || []).length ? c : best
+  );
+}
+
+function e1rmTrend(canon) {
+  const pts = exE1rm[canon] || [];
+  const now = Date.now();
+  const D90 = 90 * 86400000;
+  const recent = pts.filter(p => now - p.x <= D90);
+  const prev   = pts.filter(p => now - p.x > D90 && now - p.x <= D90 * 2);
+  if (!recent.length || !prev.length) return null;
+  const avgR = recent.reduce((s, p) => s + p.y, 0) / recent.length;
+  const avgP = prev.reduce((s, p) => s + p.y, 0) / prev.length;
+  const diff = avgR - avgP;
+  if (diff > 2)  return { label: '▲ 上昇中',   color: '#5E7C8A' };
+  if (diff < -2) return { label: '▼ 要注意',   color: '#B5795B' };
+  return             { label: '→ 停滞気味', color: '#C2A35A' };
+}
+
+function daysSinceLastTrained(part) {
+  const today = new Date();
+  for (let i = rawData.length - 1; i >= 0; i--) {
+    if (rawData[i].items.some(it => (classify(it.name) || {}).part === part)) {
+      return Math.floor((today - new Date(rawData[i].date)) / 86400000);
+    }
+  }
+  return null;
+}
+
+function buildInsightMessages() {
+  const msgs = [];
+  const now = Date.now();
+  const D90 = 90 * 86400000;
+  // 頻度トレンド: 直近90日 vs 前90日
+  const recentN = rawData.filter(d => now - new Date(d.date).getTime() <= D90).length;
+  const prevN   = rawData.filter(d => { const t = now - new Date(d.date).getTime(); return t > D90 && t <= D90 * 2; }).length;
+  if (prevN > 0 && recentN < prevN * 0.7) {
+    msgs.push(`直近3ヶ月のペースが落ちています（${(prevN/3).toFixed(1)}回/月 → ${(recentN/3).toFixed(1)}回/月）。まず継続を意識しましょう。`);
+  }
+  // ベンチ上昇 × 背中が追いついていない
+  const backCanon = pickByData(['ラットプルダウン', '加重懸垂']);
+  if (e1rmTrend('ベンチプレス')?.label === '▲ 上昇中' && e1rmTrend(backCanon)?.label !== '▲ 上昇中') {
+    msgs.push(`ベンチプレスが伸びています。背中の強化も並行して意識するとバランスが取れます。`);
+  }
+  // 脚セッションが少ない
+  const legCanon = pickByData(['スクワット', 'レッグプレス']);
+  const benchN = (exE1rm['ベンチプレス'] || []).length;
+  const legN   = (exE1rm[legCanon] || []).length;
+  if (msgs.length < 2 && legN < benchN * 0.4) {
+    msgs.push(`脚のデータがベンチの${Math.round(legN/benchN*100)}%ほどです。3大種目として意識的に取り入れてみてください。`);
+  }
+  return msgs.slice(0, 2);
+}
+
+function renderSuggestionCard() {
+  const KEY_EX = [
+    'ベンチプレス',
+    pickByData(['ラットプルダウン', '加重懸垂']),
+    pickByData(['スクワット', 'レッグプレス']),
+    pickByData(['ショルダープレス', 'ミリタリープレス'])
+  ];
+
+  let exRows = '';
+  for (const canon of KEY_EX) {
+    const best = exBestE1rm[canon];
+    if (!best) continue;
+    const bestVal = Math.round(best.val * 10) / 10;
+    const nextTarget = Math.ceil(best.val / 5) * 5;
+    const prevTarget = nextTarget - 5;
+    const progress = Math.min(100, Math.round((best.val - prevTarget) / 5 * 100));
+    const trend = e1rmTrend(canon);
+    const partColor = PART_COLOR[exMeta[canon]] || 'var(--mut)';
+    const trendHtml = trend
+      ? `<span style="font-size:11px;color:${trend.color};margin-left:8px;">${trend.label}</span>`
+      : '';
+    exRows += `
+      <div style="margin-bottom:18px;">
+        <div style="display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;">
+          <span style="font-size:13px;font-weight:500;color:${partColor};">${canon}</span>
+          <span class="num" style="font-size:20px;font-weight:300;">${bestVal} kg</span>
+          ${trendHtml}
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:6px;">
+          <div style="flex:1;height:4px;border-radius:2px;background:var(--line);overflow:hidden;">
+            <div style="width:${progress}%;height:100%;background:${partColor};border-radius:2px;"></div>
+          </div>
+          <span style="font-size:11px;color:var(--mut);white-space:nowrap;">→ ${nextTarget} kg まで あと ${Math.round((nextTarget - best.val) * 10) / 10} kg</span>
+        </div>
+      </div>`;
+  }
+
+  const msgs = buildInsightMessages();
+  const msgHtml = msgs.length
+    ? `<p style="font-size:13px;color:var(--mut);line-height:1.9;margin-bottom:20px;">${msgs.join('<br>')}</p>`
+    : '';
+
+  // 直近セッションの部位（休養として除外）
+  const lastParts = new Set(
+    (rawData[rawData.length - 1]?.items || [])
+      .map(it => (classify(it.name) || {}).part).filter(Boolean)
+  );
+
+  const hintParts = PART_ORDER
+    .map(p => ({ part: p, days: daysSinceLastTrained(p) }))
+    .filter(({ part, days }) => days !== null && days >= 10 && !lastParts.has(part))
+    .sort((a, b) => b.days - a.days)
+    .slice(0, 3);
+
+  const hintHtml = hintParts.length
+    ? `<hr class="thin">
+       <div class="lab" style="margin-bottom:10px;">次回に入れたい部位（参考）</div>
+       <div style="display:flex;gap:8px;flex-wrap:wrap;">
+         ${hintParts.map(({ part, days }) =>
+           `<div style="display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border:1px solid ${PART_COLOR[part]};border-radius:20px;font-size:12px;">
+             <span style="width:8px;height:8px;border-radius:50%;background:${PART_COLOR[part]};display:inline-block;flex-shrink:0;"></span>
+             <span style="color:${PART_COLOR[part]};font-weight:500;">${part}</span>
+             <span style="color:var(--mut);">${days}日ぶり</span>
+           </div>`
+         ).join('')}
+       </div>`
+    : '';
+
+  const card = document.createElement('div');
+  card.className = 'card fade';
+  card.style.marginBottom = '16px';
+  card.innerHTML = `
+    <div class="section-title" style="margin-bottom:4px;">⑤ 今の状態と次回のヒント</div>
+    <div class="section-sub" style="margin-bottom:16px;">3大種目 + 肩の推定1RM進捗と大局観</div>
+    ${msgHtml}
+    ${exRows}
+    ${hintHtml}
+  `;
+
+  const recordCard = document.getElementById('recordTable').closest('.card.fade');
+  recordCard.parentNode.insertBefore(card, recordCard);
+}
+
+renderSuggestionCard();
+
+function delWorkout(date) {
+  userStore.workouts = userStore.workouts.filter(w => w.date !== date);
+  saveStore(userStore); location.reload();
+}
+function delBodyweight(date) {
+  userStore.bodyweight = userStore.bodyweight.filter(b => b.date !== date);
+  saveStore(userStore); location.reload();
+}
+
+function renderStoreInfo() {
+  const el = document.getElementById('storeInfo');
+  const nw = userStore.workouts.length, nb = userStore.bodyweight.length;
+  if (!nw && !nb) { el.innerHTML = ''; return; }
+
+  const wRows = userStore.workouts.slice().sort((a,b)=>a.date.localeCompare(b.date)).map(w =>
+    `<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--line);">
+       <span>${w.date}　<span style="color:var(--mut);">${w.items.map(i=>i.name).join('・')}</span></span>
+       <a href="#" data-del-w="${w.date}" style="color:var(--clay);font-size:12px;flex-shrink:0;margin-left:10px;">削除</a>
+     </div>`).join('');
+  const bRows = userStore.bodyweight.slice().sort((a,b)=>a.date.localeCompare(b.date)).map(b =>
+    `<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--line);">
+       <span>${b.date}　<span style="color:var(--mut);">体重 ${b.kg} kg</span></span>
+       <a href="#" data-del-b="${b.date}" style="color:var(--clay);font-size:12px;flex-shrink:0;margin-left:10px;">削除</a>
+     </div>`).join('');
+
+  el.innerHTML =
+    `<div style="margin-bottom:8px;">この端末に追記した記録: <b>${nw}</b> セッション / <b>${nb}</b> 体重 　<a href="#" id="expLink" style="color:var(--slate);">data.js用に書き出す</a> ・ <a href="#" id="clrLink" style="color:var(--mut);">全消去</a></div>
+     <div style="font-size:13px;">${wRows}${bRows}</div>
+     <div style="font-size:11px;color:var(--faint);margin-top:6px;">※ 修正は「削除」して貼り直してください。</div>`;
+
+  document.getElementById('expLink').onclick = (e) => { e.preventDefault(); exportStore(); };
+  document.getElementById('clrLink').onclick = (e) => { e.preventDefault(); if (confirm('この端末に追記した記録を全部消しますか？（data.js の元データは消えません）')) { localStorage.removeItem(STORE_KEY); location.reload(); } };
+  el.querySelectorAll('[data-del-w]').forEach(a => a.onclick = (e) => { e.preventDefault(); if (confirm(a.getAttribute('data-del-w') + ' の記録を削除しますか？')) delWorkout(a.getAttribute('data-del-w')); });
+  el.querySelectorAll('[data-del-b]').forEach(a => a.onclick = (e) => { e.preventDefault(); if (confirm(a.getAttribute('data-del-b') + ' の体重を削除しますか？')) delBodyweight(a.getAttribute('data-del-b')); });
+}
+renderStoreInfo();
+
+/* --- 自己ベスト更新（PR）バナー：保存リロード後に表示 --- */
+function showPRBanner() {
+  let prs;
+  try { prs = JSON.parse(sessionStorage.getItem('workout_prs')); } catch (e) { return; }
+  if (!prs || !prs.length) return;
+  sessionStorage.removeItem('workout_prs');
+  const banner = document.createElement('div');
+  banner.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:999;background:var(--card);border:1px solid var(--slate);border-radius:14px;box-shadow:0 4px 20px rgba(63,58,49,.12);padding:16px 24px;font-size:14px;color:var(--ink);text-align:center;animation:fadeIn .4s;';
+  banner.innerHTML = `🎉 <b>自己ベスト更新！</b><br>` +
+    prs.map(p => `<span style="color:var(--slate);">${p.name}</span> ${p.from} → <b>${p.to}</b> kg`).join('<br>');
+  document.body.appendChild(banner);
+  setTimeout(() => { banner.style.transition = 'opacity .5s'; banner.style.opacity = '0'; setTimeout(() => banner.remove(), 500); }, 4500);
+}
+showPRBanner();
+</script>
+</body>
+</html>
